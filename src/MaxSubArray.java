@@ -58,14 +58,21 @@ public class MaxSubArray {
 			}else {
 				lastResultDivide++;
 			}
-			//Storing array in a txt file
-			try (FileWriter f = new FileWriter("randomlyCreatedArrays.txt", true); BufferedWriter b = new BufferedWriter(f); PrintWriter p = new PrintWriter(b);) {
-				p.print("array"+i+":  ");
+			//Storing results in a txt file
+			try (FileWriter f = new FileWriter("lastResults.txt", true); BufferedWriter b = new BufferedWriter(f); PrintWriter p = new PrintWriter(b);) {
+				p.print("length"+array.length+", array"+i+":  ");
 				for (int j = 0; j < array.length; j++) {
-					p.print(array[i]+" ");
+					p.print(array[j]+" ");
 				}
+				p.println("\n\n");
+				p.println("Brute:     "+resultBrute/100+"\n");
+				p.println("Divide:    "+resultDivide/100+"\n");
+				p.println("Optimized: "+resultOptimized/100+"\n");
+
 			} 
 			catch (IOException err) { err.printStackTrace(); }
+			
+
 		}
 		System.out.println("Firstly, 500 random calculation is repeated for finding the optimized point, which is found as "+optimizedPoint);
 		System.out.println("LAST RESULTS\n\n With optimized and other two algorithm, totally randomized calculations created is repeated for 1000 time\n\nAccording to the results;");
@@ -77,8 +84,9 @@ public class MaxSubArray {
 	public static int findOptimizedPoint() {
 		Random rnd=new Random();
 		int optimizedPoint=0;
-		for (int i = 0; i < 2200; i++) {
+		for (int i = 0; i < 1000; i++) {
 			int lengthArray=10;
+			int tries=0;
 			while (true) {
 				int[] array=new int[lengthArray];
 				for (int j = 0; j < array.length; j++) {
@@ -99,14 +107,32 @@ public class MaxSubArray {
 		        long resultDivide=Math.abs(endDivide-startDivide);
 				
 		        if (resultDivide<resultBrute) {
-		        	System.out.println(lengthArray);
 					optimizedPoint+=lengthArray;
+					
+					//Storing array in a txt file
+					try (FileWriter f = new FileWriter("firstResults.txt", true); BufferedWriter b = new BufferedWriter(f); PrintWriter p = new PrintWriter(b);) {
+						p.print("Found in "+tries+". try"+",length"+array.length+", array"+i+":  ");
+						for (int j = 0; j < array.length; j++) {
+							p.print(array[j]+" ");
+						}
+						p.println("\n\n");
+						p.println("Brute:     "+resultBrute/100+"\n");
+						p.println("Divide:    "+resultDivide/100+"\n");
+
+					} 
+					catch (IOException err) { err.printStackTrace(); }
 					break;
 				}
 				lengthArray++;
+				tries++;
 			}
 		}
-		return optimizedPoint/2200;
+		try (FileWriter f = new FileWriter("firstResults.txt", true); BufferedWriter b = new BufferedWriter(f); PrintWriter p = new PrintWriter(b);) {
+			p.println("optimized point is found as "+optimizedPoint/1000);
+
+		} 
+		catch (IOException err) { err.printStackTrace(); }
+		return optimizedPoint/1000;
 		
 	}
 	public static Tuple findBruteForce(int[] array,int low, int high) {
