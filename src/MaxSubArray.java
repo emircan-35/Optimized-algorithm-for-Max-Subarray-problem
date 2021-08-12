@@ -1,4 +1,8 @@
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Random;
 
 public class MaxSubArray {
@@ -9,49 +13,27 @@ public class MaxSubArray {
 	
 	public static void testAlgorithms() {
 		Random rnd=new Random();
-		int optimizedPoint=0;
-		for (int i = 0; i < 2200; i++) {
-			int lengthArray=10;
-			while (true) {
-				int[] array=new int[lengthArray];
-				for (int j = 0; j < array.length; j++) {
-					int num=rnd.nextInt(1000);
-					if (rnd.nextInt(2)==1) num=num*-1;
-					array[j]=num;
-				}
-				
-		        long startBrute = System.nanoTime();
-		        Tuple brute=findBruteForce(array,0,array.length-1);
-		        long endBrute = System.nanoTime();
-		        long resultBrute=Math.abs(endBrute-startBrute);
-		        
-		        
-		        long startDivide = System.nanoTime();
-		        Tuple divide=findMaximumSubArray(array, 0, lengthArray-1);
-		        long endDivide = System.nanoTime();
-		        long resultDivide=Math.abs(endDivide-startDivide);
-				
-		        if (resultDivide<resultBrute) {
-		        	System.out.println(lengthArray);
-					optimizedPoint+=lengthArray;
-					break;
-				}
-				lengthArray++;
-			}
-		}
-		optimizedPoint=optimizedPoint/2200;
+		int optimizedPoint=findOptimizedPoint();
 		
 		System.out.println("optimized point is "+optimizedPoint);
 		//NOW TIME TO OPTIMIZE AND GET THE RESULTS
 		
-		int[] lastResult=new int[1000];
-		for (int i = 0; i < lastResult.length; i++) {
+		//Creating some integer variables to count which algorithm wins how many times 
+		int lastResultBrute=0;
+		int lastResultDivide=0;
+		int lastResultOptimized=0;
+		for (int i = 0; i < 1000; i++) {
+			//Creating an array randomly
 			int[] array=new int[i+10];
 			for (int j = 0; j < array.length; j++) {
 				int number=rnd.nextInt(1000);
 				if (rnd.nextInt(2)==1) number=number*-1;
 				array[j]=number;
 			}
+
+
+			
+			//Starting to measure
 	        long startBrute = System.nanoTime();
 	        findBruteForce(array,0,array.length-1);
 	        long endBrute = System.nanoTime();
@@ -68,31 +50,63 @@ public class MaxSubArray {
 	        long endOptimized= System.nanoTime();
 	        long resultOptimized=endOptimized-startOptimized;
 	        
+	        //Storing winners
 	        if (resultOptimized<resultDivide&&resultOptimized<resultBrute) {
-				lastResult[i]=2;
-			}else if(resultBrute<resultOptimized&&resultBrute<resultDivide) {
-				lastResult[i]=0;
-			}else {
-				lastResult[i]=1;
-			}
-		}
-		int lastResultBrute=0;
-		int lastResultDivide=0;
-		int lastResultOptimized=0;
-		for (int i = 0; i < lastResult.length; i++) {
-			if (lastResult[i]==1) {
-				lastResultDivide++;
-			}else if(lastResult[i]==2) {
-				lastResultOptimized++;
-			}else {
+	        	lastResultOptimized++;
+	        }else if(resultBrute<resultOptimized&&resultBrute<resultDivide) {
 				lastResultBrute++;
+			}else {
+				lastResultDivide++;
 			}
+			//Storing array in a txt file
+			try (FileWriter f = new FileWriter("randomlyCreatedArrays.txt", true); BufferedWriter b = new BufferedWriter(f); PrintWriter p = new PrintWriter(b);) {
+				p.print("array"+i+":  ");
+				for (int j = 0; j < array.length; j++) {
+					p.print(array[i]+" ");
+				}
+			} 
+			catch (IOException err) { err.printStackTrace(); }
 		}
 		System.out.println("Firstly, 500 random calculation is repeated for finding the optimized point, which is found as "+optimizedPoint);
 		System.out.println("LAST RESULTS\n\n With optimized and other two algorithm, totally randomized calculations created is repeated for 1000 time\n\nAccording to the results;");
 		System.out.println("\nBrute: "+lastResultBrute);
 		System.out.println("\nDivide: "+lastResultDivide);
 		System.out.println("\nOptimized: "+lastResultOptimized);
+	}
+	
+	public static int findOptimizedPoint() {
+		Random rnd=new Random();
+		int optimizedPoint=0;
+		for (int i = 0; i < 2200; i++) {
+			int lengthArray=10;
+			while (true) {
+				int[] array=new int[lengthArray];
+				for (int j = 0; j < array.length; j++) {
+					int num=rnd.nextInt(1000);
+					if (rnd.nextInt(2)==1) num=num*-1;
+					array[j]=num;
+				}
+				
+		        long startBrute = System.nanoTime();
+		        findBruteForce(array,0,array.length-1);
+		        long endBrute = System.nanoTime();
+		        long resultBrute=Math.abs(endBrute-startBrute);
+		        
+		        
+		        long startDivide = System.nanoTime();
+		        findMaximumSubArray(array, 0, lengthArray-1);
+		        long endDivide = System.nanoTime();
+		        long resultDivide=Math.abs(endDivide-startDivide);
+				
+		        if (resultDivide<resultBrute) {
+		        	System.out.println(lengthArray);
+					optimizedPoint+=lengthArray;
+					break;
+				}
+				lengthArray++;
+			}
+		}
+		return optimizedPoint/2200;
 		
 	}
 	public static Tuple findBruteForce(int[] array,int low, int high) {
